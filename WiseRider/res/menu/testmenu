@@ -1,0 +1,24 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+
+    
+    
+    <item
+        android:id="@+id/action_showOfferRoutes"
+        android:orderInCategory="100"
+        android:showAsAction="ifRoom|withText"
+        android:title="showOffers"/>
+     <item
+        android:id="@+id/action_showRequestRoutes"
+        android:orderInCategory="100"
+        android:showAsAction="ifRoom|withText"
+        android:title="showRequests"/>
+             <item
+        android:id="@+id/action_findMatch"
+        android:orderInCategory="100"
+        android:showAsAction="ifRoom|withText"
+        android:title="Find Match"/>
+
+
+
+</menu>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">WiseRider</string>
+    <string name="action_settings">Settings</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="direction">Direction</string>
+    <string name="setoffer">Set offer</string>
+    <string name="request">Request offer</string>
+    <string name="cancel">Cancel</string>
+    <string name="confirm">Confirm</string>
+    <string name="fromMap">fromMap</string>
+    <string name="typeAddress">Type an Address or Select</string>
+    <string name="login">Login</string>
+    <string name="UserName">User Name</string>
+    <string name="password">Password</string>
+    <string name="greetings">Welcom, you can set an offer or request by tap Direction on menu bar.</string>
+    <string name="no_smoker">no smoker</string>
+    <string name="only_male">only Male in car</string>
+    <string name="only_female">only female in car</string>
+     <string name="price">Payment (higher may increse matching rate)</string>
+     <string name="seatsNum">Seats Aviable</string>
+    
+
+</resources>

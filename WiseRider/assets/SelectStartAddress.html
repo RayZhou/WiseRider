@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+<style type="text/css">
+html {
+	height: 100%
+}
+
+body {
+	height: 100%;
+	margin: 0;
+	padding: 0
+}
+
+#map_canvas {
+	height: 100%
+}
+</style>
+<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
+
+<script type="text/javascript">
+	var map;
+	var elevator;
+	var geocoder=new google.maps.Geocoder();
+	var infowindow = new google.maps.InfoWindow();
+	var marker;
+	var getLatLng = function(lat, lng) {
+		return new google.maps.LatLng(lat, lng);
+	}
+
+	function initialize() {
+		//get the user's most current location, 
+		//using it to initialize the google map that centred at that geolocatin
+		var userCurrentlat = 0;
+		var userCurrentlng = 0;
+		//get user's most recently location from andorid device
+ 		if (window.android) {
+			userCurrentlat = window.android.getLatitude();
+			userCurrentlng = window.android.getLongitude();
+		} 
+		var mapOptions = {
+			//center: new google.maps.LatLng(-34.397, 150.644),
+			center : new google.maps.LatLng(userCurrentlat, userCurrentlng),
+			zoom : 14,
+			mapTypeId : google.maps.MapTypeId.ROADMAP
+		};
+		// then create a map
+		map = new google.maps.Map(document.getElementById("map_canvas"),
+				mapOptions);
+		//adding marker by click on map
+		google.maps.event.addListener(map, 'click', function(e) {
+			addmarker(e.latLng);
+			displayinfo(marker.getPosition());
+		});
+	}
+	function addmarker(latLng) {
+		if (marker) {
+			marker.setPosition(latLng);
+		} else {
+			marker = new google.maps.Marker({
+				position : latLng,
+				map : map,
+				draggable : true
+			});
+		}
+		google.maps.event.addListener(marker, 'dragend', function() {
+			displayinfo(marker.getPosition());
+		});
+		
+	}
+	function displayinfo(latLng) {
+		var html = '';
+		geocoder.geocode({'latLng' : latLng	}, function(results, status) {
+							if (status == google.maps.GeocoderStatus.OK) {
+								if (results[0]) {
+									html = results[0].formatted_address
+									
+									//save the address to android
+									if (window.android) {
+										window.android.settempStartAddress(results[0].formatted_address);
+									}
+									
+									//Create a LocationElevationRequest object using the array's one value
+									var locations = [];
+									locations.push(latLng);
+									var positionalRequest = {
+										'locations' : locations
+									}
+									// Create an ElevationService
+									elevator = new google.maps.ElevationService();
+									elevator.getElevationForLocations(positionalRequest, function(results, status) {
+														if (status == google.maps.ElevationStatus.OK) {
+															// Retrieve the first result
+															if (results[0]) {
+																html += '<br><br>Elevation: <b>'
+																		+ results[0].elevation
+																		+ " meters.</b>";
+																html += '<br><button onclick="saveMarker(marker)">Save</button>';
+																infowindow.setContent(html);
+																infowindow.open(map,marker);
+															}
+														}
+													});
+
+								}
+							} else {
+								alert("Geocoder failed due to: " + status);
+							}
+						});
+	}
+	function saveMarker(marker) {
+		if (window.android) {
+			var p = marker.position.toString()
+			var latlngStr = p.split(",");
+			var lat = latlngStr[0].substr(1)
+			var lng = latlngStr[1].substr(0, latlngStr[1].length - 1)
+			window.android.saveStartPointTopublicBox(marker.position.lat(),
+					marker.position.lng());
+			window.android.finishActivie();
+		}
+	}
+	google.maps.event.addDomListener(window, 'load', initialize);
+</script>
+
+</head>
+
+<body onload="initialize()">
+	<div id="map_canvas" style="width: 100%; height: 100%"></div>
+
+</body>
+</html>

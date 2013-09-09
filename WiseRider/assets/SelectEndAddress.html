@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+<style type="text/css">
+html {
+	height: 100%
+}
+
+body {
+	height: 100%;
+	margin: 0;
+	padding: 0
+}
+
+#map_canvas {
+	height: 100%
+}
+</style>
+<script type="text/javascript"
+	src="http://maps.googleapis.com/maps/api/js?v=3&amp;sensor=false"></script>
+
+<script type="text/javascript">
+	var map;
+	var elevator;
+	var directionsDisplay = new google.maps.DirectionsRenderer();
+	var directionsService = new google.maps.DirectionsService();
+	var geocoder = new google.maps.Geocoder();
+	var infowindow = new google.maps.InfoWindow();
+	var infowindow2 = new google.maps.InfoWindow();
+	var marker;
+	var userStart_marker;
+	var getLatLng = function(lat, lng) {
+		return new google.maps.LatLng(lat, lng);
+	}
+	var str='Cannot determine address at this location.';
+	//if flag==1 then setContent of infowindow
+	//if flat==2 then setContent of infowindow2
+	function geocodePosition(pos) {
+		geocoder.geocode({'latLng' : pos},function(results, status) {
+			if (status == google.maps.GeocoderStatus.OK) {
+				if (results[0]) {
+					if (window.android){
+						window.android.settempEndAddress(results[0].formatted_address);
+					}
+					//infowindow2.setContent(results[0].formatted_address);
+				}			      
+		    } else {
+		    	window.android.settempEndAddress('Cannot determine address at this location.');
+		    }
+		  });
+		}
+	function initialize() {
+		
+		//get the start point, 
+		//using it to initialize the google map that centred at that geolocatin
+		var startlat = 0;
+		var startlng = 0;
+		//get user's most recently location from andorid device
+		if (window.android) {
+			//window.android.showToast("test");
+			startlat = window.android.getStartPointLat();
+			startlng = window.android.getStartPointLng();
+
+		}
+		//setting mapOption
+		var mapOptions = {
+			//center: new google.maps.LatLng(-34.397, 150.644),
+			center : new google.maps.LatLng(startlat, startlng),
+			zoom : 14,
+			mapTypeId : google.maps.MapTypeId.ROADMAP
+		};
+		//create a map
+		map = new google.maps.Map(document.getElementById("map_canvas"),
+				mapOptions);
+
+		directionsDisplay = new google.maps.DirectionsRenderer({
+			'map' : map,
+			'preserveViewport' : true,
+			'suppressMarkers' : true
+		});
+		//add user's start location Marker
+ 		userStart_marker = new google.maps.Marker({
+			position : getLatLng(startlat, startlng),
+			map : map,
+			title : "Start Point"
+		});
+		//find strat marker's address
+ 		
+ 		google.maps.event.addListener(userStart_marker, 'click', function(e) {		
+ 			//geocodePosition(userStart_marker.getPosition(),1);
+ 			if(window.android){
+				infowindow.setContent('Start Point:<b><br>' + window.android.gettempStartAddress());
+				infowindow.open(map,userStart_marker);
+ 			}
+		}); 
+		google.maps.event.addListener(map, 'click', function(e) {
+			addEndMarker(e.latLng);
+		});
+
+
+	}
+	function addEndMarker(latLng) {
+		if (marker) {
+			marker.setPosition(latLng);
+		} else {
+			marker = new google.maps.Marker({
+				position : latLng,
+				map : map,
+				draggable : true
+			});
+			google.maps.event.addListener(marker, 'dragend', function(e) {
+				directionsDisplay.setMap(null);
+				displayinfo(marker.getPosition());
+				calroute(userStart_marker.position,marker.position);
+				//alert("I am Here");
+			});
+		}
+
+		//display it
+		displayinfo(marker.getPosition());
+		//calroute(userStart_marker.position, marker.position);
+	}
+	function calroute(start, end) {
+		var request = {
+			origin : start,
+			destination : end,
+			travelMode : google.maps.DirectionsTravelMode.DRIVING
+		};
+		directionsService.route(request, function(response, status) {
+			if (status == google.maps.DirectionsStatus.OK) {
+				directionsDisplay.setMap(map);
+				
+				// Display the distance:
+		         document.getElementById('distance').innerHTML = 
+		            response.routes[0].legs[0].distance.value + " meters away from start point";
+
+		         // Display the duration:
+		         document.getElementById('duration').innerHTML = 
+		        	response.routes[0].legs[0].duration.value/60 + " mins for Driving";
+				
+				directionsDisplay.setDirections(response);
+			}
+		});
+	}
+	
+
+	
+	function displayinfo(latLng) {
+
+		html = '';
+		geocoder.geocode({'latLng' : latLng},function(results, status) {
+						if (status == google.maps.GeocoderStatus.OK) {
+							if (results[0]) {
+								html ='End Point:<b><br>'+ results[0].formatted_address;
+
+								var locations = [];
+								locations.push(latLng);
+
+								// Create a LocationElevationRequest object using the array's one value
+								var positionalRequest = {
+									'locations' : locations
+								}
+								// Create an ElevationService
+								elevator = new google.maps.ElevationService();
+								elevator.getElevationForLocations(positionalRequest,function(results, status) {
+													if (status == google.maps.ElevationStatus.OK) {
+														// Retrieve the first result
+														if (results[0]) {
+															html += '<br><br>Elevation: <b>'
+																	+ results[0].elevation
+																	+ " meters.</b>";
+															html += '<br><button onclick="saveMarker(marker)">Save</button>';
+															calroute(userStart_marker.position, marker.position);
+															infowindow2.setContent(html);
+															infowindow2.open(map,marker);
+														}
+													}
+												});
+
+							}
+						} else {
+							alert("Geocoder failed due to: " + status);
+						}
+					});  
+	}
+	function saveMarker(marker) {
+		if (window.android) {
+
+			var p = marker.position.toString()
+			var latlngStr = p.split(",");
+			var lat = latlngStr[0].substr(1)
+			var lng = latlngStr[1].substr(0, latlngStr[1].length - 1)
+			window.android.saveLocationTopublicBox(marker.position.lat(),
+					marker.position.lng());
+		}
+	}
+	google.maps.event.addDomListener(window, 'load', initialize);
+</script>
+
+</head>
+
+<body onload="initialize()">
+	<div id="map_canvas" style="width: 100%; height:96%"></div>
+	<div id="duration" style="width: 100%; height:2%">Duration: </div> 
+   	<div id="distance" style="width: 100%; height:2%">Distance: </div>
+
+</body>
+</html>
