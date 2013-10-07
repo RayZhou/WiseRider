@@ -13,11 +13,24 @@ public class PublicDataBox extends Application {
 	public static SharedPreferences preferences;
 	private Points startPoint=new Points(),endPoint=new Points();
 	private String tempStartAddress,tempEndAddress;
-	private Route userRoute=new Route();
+	private Person user=new Person();
 	private String RouteModel="";
+	//user model, true as driver, false as passenger;
+	private boolean userModel=true;
+	
+	public boolean isUserModel() {
+		return userModel;
+	}
+	public void setUserModel(boolean userModel) {
+		this.userModel = userModel;
+	}
 	private int seatsNum=0;
-	private ArrayList<Route> offerList=new ArrayList<Route>();
-	private ArrayList<Route> requestList=new ArrayList<Route>();
+	//this is driver list
+	private ArrayList<Person> offerList=new ArrayList<Person>();
+	//those are passenger list
+	private ArrayList<Person> requestList=new ArrayList<Person>();
+	//those are matched route
+	private ArrayList<Route> matchedRoute=new ArrayList<Route>();
 	
 
 	public void clearOfferList(){
@@ -26,13 +39,13 @@ public class PublicDataBox extends Application {
 	public void clearRequestList(){
 		requestList.clear();
 	}
-	public Route getUserRoute(){
-		return userRoute;
+	public Person getUser(){
+		return user;
 	}
-	public void addOfferToList(Route toAdd){
+	public void addOfferToList(Person toAdd){
 		offerList.add(toAdd);
 	}
-	public void addRequestToList(Route toAdd){
+	public void addRequestToList(Person toAdd){
 		requestList.add(toAdd);
 	}
 	public int getOfferListSize(){
@@ -41,19 +54,18 @@ public class PublicDataBox extends Application {
 	public int getRequestListSize(){
 		return requestList.size();
 	}
-	public Route getOfferByIndex(int index){
+	public Person getOfferByIndex(int index){
 		return offerList.get(index);
 	}
-	public Route getRequestByIndex(int index){
+	public Person getRequestByIndex(int index){
 		return requestList.get(index);
 	}
-	public void saveUserRoute(){
+	public void saveUser(){
 		if(startPoint.isNotEmpty()){
 			if(endPoint.isNotEmpty()){
 				String username=getUsername();
-				Person user=new Person(username,startPoint,endPoint);
-				Route temp=new Route(RouteModel, user);				
-				userRoute=temp;
+				Person temp=new Person(username,userModel,startPoint,endPoint);
+				user=temp;
 			}
 		}
 	}
@@ -94,7 +106,7 @@ public class PublicDataBox extends Application {
 	 */
 	public void setEndPoint(Points endPoint) {
 		this.endPoint = endPoint;
-		saveUserRoute();
+		saveUser();
 	}
 
 	/**

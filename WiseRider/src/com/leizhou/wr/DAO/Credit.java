@@ -8,6 +8,7 @@ package com.leizhou.wr.DAO;
  *
  */
 public class Credit {
+	
 	private double orignalCredit=0;
 	private double finalCredit=0;
 	private double petrolConsumed=0;

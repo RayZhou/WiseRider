@@ -43,7 +43,7 @@ public class MainActivity extends Activity implements LocationListener {
 	        android.app.FragmentManager fm = getFragmentManager();
 	        SetDirectionDialog setOfferDialog = new SetDirectionDialog();
 	        //testDialog.setMostRecentLocation(mostRecentLocation);
-	        setOfferDialog.setModel("offer");
+	        setOfferDialog.setModel(true);
 	        setOfferDialog.setRetainInstance(true);
 	        setOfferDialog.setCancelable(false);
 	        setOfferDialog.show(fm, "fragment_name");
@@ -56,7 +56,7 @@ public class MainActivity extends Activity implements LocationListener {
 	        android.app.FragmentManager fm = getFragmentManager();
 	        SetDirectionDialog setOfferDialog = new SetDirectionDialog();
 	        //testDialog.setMostRecentLocation(mostRecentLocation);
-	        setOfferDialog.setModel("request");
+	        setOfferDialog.setModel(false);
 	        setOfferDialog.setRetainInstance(true);
 	        setOfferDialog.setCancelable(false);
 	        setOfferDialog.show(fm, "fragment_name");

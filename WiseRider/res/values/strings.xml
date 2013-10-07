@@ -9,8 +9,9 @@
     <string name="request">Request offer</string>
     <string name="cancel">Cancel</string>
     <string name="confirm">Confirm</string>
-    <string name="fromMap">fromMap</string>
-    <string name="typeAddress">Type an Address or Select</string>
+    <string name="from">From?</string>
+    <string name="WhereTo">WhereTo?</string>
+    <string name="typeAddress">Select from MapView</string>
     <string name="login">Login</string>
     <string name="UserName">User Name</string>
     <string name="password">Password</string>

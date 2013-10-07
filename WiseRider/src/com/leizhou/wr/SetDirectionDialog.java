@@ -1,5 +1,6 @@
 package com.leizhou.wr;
 
+import com.leizhou.wr.DAO.PublicDataBox;
 import com.leizhou.wr.web.OpenWebView;
 
 import android.app.Dialog;
@@ -18,9 +19,12 @@ import android.widget.Button;
 	        // Empty constructor required for DialogFragment
 	    }
 
-		private String Model="";
-		public void setModel(String model){
+		private boolean Model=true;
+		public void setModel(boolean model){
 			this.Model=model;
+			if(Model==false){
+				
+			}
 		}
 	    /** The system calls this only when creating the layout in a dialog. */
 	    @Override
@@ -63,13 +67,14 @@ import android.widget.Button;
 	        bt_fromMap1.setOnClickListener(new OnClickListener() {
 	            public void onClick(View v) {
 	                //select a address from map
-	            	if(Model.equalsIgnoreCase("offer")){
-	            		// set offer
+	            	if(Model==true){
+	            		// driver finding passenger
 	            		Intent intent = new Intent(dialog.getContext(), OpenWebView.class);
 	            		intent.putExtra("isStartAddress", true);
+	            		intent.putExtra("userModel", Model);
 	            		startActivity(intent); 
 	            	}
-	            	if(Model.equalsIgnoreCase("request")){
+	            	if(Model==false){
 	            		//do request
 	            	}
 	            }
@@ -78,12 +83,12 @@ import android.widget.Button;
 	        bt_fromMap2.setOnClickListener(new OnClickListener() {
 	            public void onClick(View v) {
 	                ////select end address from map
-	            	if(Model.equalsIgnoreCase("offer")){
+	            	if(Model==true){
 	                Intent intent = new Intent(dialog.getContext(), OpenWebView.class);
 	                intent.putExtra("isEndAddress", false);
 	                startActivity(intent);
 	            	}
-	            	if(Model.equalsIgnoreCase("request")){
+	            	if(Model==false){
 	            		//do request
 	            	}
 	                

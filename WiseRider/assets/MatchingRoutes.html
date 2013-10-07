@@ -43,7 +43,7 @@ html,body,#map-canvas {
 		directionsDisplay = new google.maps.DirectionsRenderer({
 			'map' : map,
  			'preserveViewport' : true,
-			'suppressMarkers' : true 
+			//'suppressMarkers' : true 
 		});
 		directionsDisplay.setMap(map);
 		directionsDisplay.setDirections(result);
@@ -92,7 +92,7 @@ html,body,#map-canvas {
 			directionsDisplay = new google.maps.DirectionsRenderer({
 				'map' : map,
 	 			'preserveViewport' : true,
-				'suppressMarkers' : true,
+				//'suppressMarkers' : true,
 				'polylineOptions' : polylineOptionsPlan
 			});
 			directionsDisplay.setMap(map);

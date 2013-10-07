@@ -40,6 +40,8 @@ public class MatchRoutes extends Activity {
 	private static final String ROUTES_XML = "/routes.xml";
 	private String res_distance = "1";
 	private WebView myWebView;
+	private ArrayList<Person> MatchedPassengerList=new ArrayList<Person>();
+	private ArrayList<Person> MatchedDriverList=new ArrayList<Person>();	
 
 	// ArrayList<Route> driverroute = new ArrayList<Route>();
 	@Override
@@ -71,12 +73,12 @@ public class MatchRoutes extends Activity {
 		
 		Points start=new Points(-45.863447,170.523348);
 		Points end=new Points(-45.877222,170.49978);
-		Person peter=new Person("Peter",start,end);
+		Person peter=new Person("Peter",false,start,end);
 		peter.setTravalDistance(3.3);
-		Route route1=new Route("request",peter);
-		((PublicDataBox) getApplication()).addRequestToList(route1);
+		//Route route1=new Route("request",peter);
+		((PublicDataBox) getApplication()).addRequestToList(peter);
 		Log.i(" ADD one route", String.valueOf(((PublicDataBox) getApplication()).getRequestListSize()));
-		
+/*		
 		start=new Points(-45.862759,170.519743);
 		end=new Points(-45.899447,170.506253);
 		Person david=new Person("David",start,end);
@@ -100,7 +102,7 @@ public class MatchRoutes extends Activity {
 		Route route4=new Route("request",john);
 		((PublicDataBox) getApplication()).addRequestToList(route4);
 		Log.i(" ADD one route", String.valueOf(((PublicDataBox) getApplication()).getRequestListSize()));
-
+*/
 
 	}
 
@@ -201,15 +203,15 @@ public class MatchRoutes extends Activity {
 		}
 
 	}
-
+	//for driver to find passenger
 	private void findRequestMatch() {
 
-		Route userRoute = new Route();
-		userRoute = ((PublicDataBox) getApplication()).getUserRoute();
+		Person userRoute = new Person();
+		userRoute = ((PublicDataBox) getApplication()).getUser();
 		int shortestpath = Integer.MAX_VALUE, index = 0;
 		try {
 			int temp_short = 0;
-			Route temp = new Route();
+			Person temp = new Person();
 			// find shortest path between userroute.startpoint,
 			// ,WayPoint[request.start point, request.end point],
 			// userroute,endpoint
@@ -224,15 +226,11 @@ public class MatchRoutes extends Activity {
 					temp = ((PublicDataBox) getApplication())
 							.getRequestByIndex(i);
 
-					// deture distance
-					json.put("depalat", userRoute.getPerson()
-							.getDeparturePoint().getLatDouble());
-					json.put("depalng", userRoute.getPerson()
-							.getDeparturePoint().getLngDouble());
-					json.put("dstlat", temp.getPerson().getArrivalPoint()
-							.getLatDouble());
-					json.put("dstlng", temp.getPerson().getArrivalPoint()
-							.getLngDouble());
+					// detour distance from driver's departure to passenger's 
+					json.put("depalat", userRoute.getDeparturePoint().getLatDouble());
+					json.put("depalng", userRoute.getDeparturePoint().getLngDouble());
+					json.put("dstlat", temp.getDeparturePoint().getLatDouble());
+					json.put("dstlng", temp.getDeparturePoint().getLngDouble());
 
 					myWebView.loadUrl("javascript:caldistance(" + "'"
 							+ json.toString() + "'" + ")");
@@ -241,41 +239,34 @@ public class MatchRoutes extends Activity {
 					temp_short += Integer.parseInt(res_distance);
 					// Log.i("json res_distance ",String.valueOf(temp_short));
 
-					json2.put("depalat", temp.getPerson()
-							.getDeparturePoint().getLatDouble());
-					json2.put("depalng", temp.getPerson()
-							.getDeparturePoint().getLngDouble());
-					json2.put("dstlat", userRoute.getPerson().getArrivalPoint()
-							.getLatDouble());
-					json2.put("dstlat", userRoute.getPerson().getArrivalPoint()
-							.getLngDouble());
+					json2.put("dstlat", userRoute.getArrivalPoint().getLatDouble());
+					json2.put("dstlat", userRoute.getArrivalPoint().getLngDouble());
+					json2.put("depalat", temp.getArrivalPoint().getLatDouble());
+					json2.put("depalng", temp.getArrivalPoint().getLngDouble());
 
 					myWebView.loadUrl("javascript:caldistance(" + "'"
 							+ json2.toString() + "'" + ")");
 					// Log.i("res_distance ",res_distance);
 					temp_short += Integer.parseInt(res_distance);
-
-					json3.put("dstlat", temp.getPerson().getArrivalPoint()
-							.getLatDouble());
-					json3.put("dstlng", temp.getPerson().getArrivalPoint()
-							.getLngDouble());
-					json3.put("depalat", temp.getPerson()
-							.getDeparturePoint().getLatDouble());
-					json3.put("depalng", temp.getPerson()
-							.getDeparturePoint().getLngDouble());
+					
+					//shared distance with passenger
+					json3.put("dstlat", temp.getArrivalPoint().getLatDouble());
+					json3.put("dstlng", temp.getArrivalPoint().getLngDouble());
+					json3.put("depalat", temp.getDeparturePoint().getLatDouble());
+					json3.put("depalng", temp.getDeparturePoint().getLngDouble());
 					myWebView.loadUrl("javascript:caldistance(" + "'"
 							+ json3.toString() + "'" + ")");
 					// Log.i("res_distance ",res_distance);
 					temp_short += Integer.parseInt(res_distance) / 2;
-
+					
+					//if user.carben+temp_short
 					Log.i("temp_short== ", String.valueOf(temp_short));
 					if (temp_short < shortestpath) {
 						shortestpath = temp_short;
 						temp_short = 0;
 						index = i;
 					}
-				}
-				
+				}	
 
 			}
 			
@@ -287,8 +278,8 @@ public class MatchRoutes extends Activity {
 		Log.i("shortest one is  ", String.valueOf(shortestpath));
 		Log.i("found index is  ", String.valueOf(index));
 		//testing listview in a dialog
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setTitle("Select Color Mode");
+		/*AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setTitle("Select passenger");
 
 		ListView modeList = new ListView(this);
 		ArrayList<String> stringArray = new ArrayList<String>();
@@ -301,7 +292,7 @@ public class MatchRoutes extends Activity {
 		builder.setView(modeList);
 		final Dialog dialog = builder.create();
 
-		dialog.show();
+		dialog.show();*/
 		
 		//end testing
 		drawPathonMap(index);
@@ -310,40 +301,40 @@ public class MatchRoutes extends Activity {
 
 	private void drawPathonMap(int index) {
 
-		Route userRoute = new Route();
-		userRoute = ((PublicDataBox) getApplication()).getUserRoute();
+		Person userRoute = new Person();
+		userRoute = ((PublicDataBox) getApplication()).getUser();
 		JSONObject json = new JSONObject();
-		Route temp = new Route(); 
+		Person temp = new Person(); 
 		temp= ((PublicDataBox) getApplication())
 				.getRequestByIndex(index);
 
 		try {
-			json.put("depalat", userRoute.getPerson().getDeparturePoint()
+			json.put("depalat", userRoute.getDeparturePoint()
 					.getLatDouble());
-			json.put("depalng", userRoute.getPerson().getDeparturePoint()
+			json.put("depalng", userRoute.getDeparturePoint()
 					.getLngDouble());
 
-			json.put("wp1lat", temp.getPerson().getDeparturePoint()
+			json.put("wp1lat", temp.getDeparturePoint()
 					.getLatDouble());
-			json.put("wp1lng", temp.getPerson().getDeparturePoint()
+			json.put("wp1lng", temp.getDeparturePoint()
 					.getLngDouble());
-			json.put("wp2lat", temp.getPerson().getArrivalPoint()
+			json.put("wp2lat", temp.getArrivalPoint()
 					.getLatDouble());
-			json.put("wp2lng", temp.getPerson().getArrivalPoint()
+			json.put("wp2lng", temp.getArrivalPoint()
 					.getLngDouble());
 
-			json.put("dstlat", userRoute.getPerson().getArrivalPoint()
+			json.put("dstlat", userRoute.getArrivalPoint()
 					.getLatDouble());
-			json.put("dstlng", userRoute.getPerson().getArrivalPoint()
+			json.put("dstlng", userRoute.getArrivalPoint()
 					.getLngDouble());
 
 			Log.i("json= ", json.toString());
 			myWebView.loadUrl("javascript:draw_path(" + "'" + json.toString()
 					+ "'" + ")");
-			myWebView.loadUrl("javascript:draw_path2(" + "'" + json.toString()
+			/*myWebView.loadUrl("javascript:draw_path2(" + "'" + json.toString()
 					+ "'" + ")");
-					myWebView.loadUrl("javascript:draw_path_markers(" + "'" + json.toString()
-							+ "'" + ")");
+			myWebView.loadUrl("javascript:draw_path_markers(" + "'" + json.toString()
+							+ "'" + ")");*/
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -357,7 +348,7 @@ public class MatchRoutes extends Activity {
 		case R.id.action_showOfferRoutes: {
 
 			try {
-				Route temp = new Route();
+				Person temp = new Person();
 				int size = ((PublicDataBox) getApplication())
 						.getOfferListSize();
 				if (size > 0) {
@@ -366,14 +357,14 @@ public class MatchRoutes extends Activity {
 						temp = ((PublicDataBox) getApplication())
 								.getOfferByIndex(i);
 
-						json.put("id", temp.getPerson().getUsername());
-						json.put("depalat", temp.getPerson()
+						json.put("id", temp.getUsername());
+						json.put("depalat", temp
 								.getDeparturePoint().getLatDouble());
-						json.put("depalng", temp.getPerson()
+						json.put("depalng", temp
 								.getDeparturePoint().getLngDouble());
-						json.put("dstlat", temp.getPerson().getArrivalPoint()
+						json.put("dstlat", temp.getArrivalPoint()
 								.getLatDouble());
-						json.put("dstlng", temp.getPerson().getArrivalPoint()
+						json.put("dstlng", temp.getArrivalPoint()
 								.getLngDouble());
 
 						myWebView.loadUrl("javascript:draw_markers(" + "'"

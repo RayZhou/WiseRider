@@ -1,5 +1,7 @@
 package com.leizhou.wr.DAO;
 
+import android.text.format.Time;
+
 /**
  * In the PathRoute case, person could be driver or passenger(s)
  * person has profits, such as name, departure and arrival points
@@ -10,19 +12,47 @@ package com.leizhou.wr.DAO;
  */
 public class Person {
 	
-	private int credit=0;;
-	private Points departurePoint;
-	private Points arrivalPoint;
+	//if this person driver or passenger;
+	//true is driver, false is passenger.
+	private boolean isDriver=true;
+	private Points departurePoint;//star point
+	private Points arrivalPoint;//end point
+	// this distance may not equal the distance between departure and arrival point
 	private double travalDistance=0;
+	//private Costs cost;
 	private String username="";
+	private Costs myCost;
+	private CarType myCar;	
+	private Time departureTime;
 	
 	
-	public Person(String username, Points start, Points end){
+	public CarType getMyCar() {
+		return myCar;
+	}
+	public void setMyCar(CarType myCar) {
+		this.myCar = myCar;
+	}
+
+	
+	
+	public void calCost(){
+		myCost.calculate(myCar, travalDistance);
+	}
+	public boolean isDriver() {
+		return isDriver;
+	}
+
+	public void setDriver(boolean isDriver) {
+		this.isDriver = isDriver;
+	}
+
+
+	public Person(String username, Boolean isDriver,Points start, Points end){
+		this.isDriver=isDriver;
 		this.username=username;
 		this.departurePoint=start;
 		this.arrivalPoint=end;		
 	}
-	
 	
 	
 	public Person() {

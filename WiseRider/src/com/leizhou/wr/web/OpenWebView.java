@@ -21,14 +21,8 @@ public class OpenWebView extends Activity {
 	private static final String MAP_URL_start = "file:///android_asset/SelectStartAddress.html";
 	private static final String MAP_URL_end = "file:///android_asset/endaddress_elevator.html";
 	boolean isStartAddress;
-	private Route userRoute;
+	private boolean userModel=true;
 
-	public Route getUserRoute() {
-		return userRoute;
-	}
-	public void setUserRoute(Route userRoute) {
-		this.userRoute = userRoute;
-	}
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -36,6 +30,8 @@ public class OpenWebView extends Activity {
 		
 		Bundle extras = getIntent().getExtras();
 		isStartAddress=extras.getBoolean("isStartAddress");
+		userModel=extras.getBoolean("userModel");
+		
 		setWebView();
 
 		// get user's most recent location from public data box
@@ -101,7 +97,7 @@ public class OpenWebView extends Activity {
 
 		@JavascriptInterface
 		public void saveStartPointTopublicBox(float lat, float lng) {
-
+			((PublicDataBox) getApplication()).setUserModel(userModel);
 			((PublicDataBox) getApplication()).setStartPoint(new Points(
 					(int) (lat * 1E6), (int) (lng * 1E6)));
 			Toast.makeText(mContext, "start point saved", Toast.LENGTH_SHORT).show();

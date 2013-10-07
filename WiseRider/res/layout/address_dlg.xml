@@ -20,7 +20,7 @@
         style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/fromMap" />
+        android:text="@string/from" />
 
     <EditText
         android:id="@+id/inputAddress2"
@@ -35,7 +35,7 @@
         style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/fromMap" />
+        android:text="@string/WhereTo" />
 
     <LinearLayout
         android:layout_width="match_parent"
