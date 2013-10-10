@@ -40,15 +40,25 @@ public class MatchRoutes extends Activity {
 	private static final String ROUTES_XML = "/routes.xml";
 	private String res_distance = "1";
 	private WebView myWebView;
+	private Person UserRoute=new Person();
 	private ArrayList<Person> MatchedPassengerList=new ArrayList<Person>();
-	private ArrayList<Person> MatchedDriverList=new ArrayList<Person>();	
+	private ArrayList<Person> MatchedDriverList=new ArrayList<Person>();
+	private double fuelConsumedFactor=0;
+	
+	private static final String[] lakes = {
+        "Superior",
+        "Victoria",
+        };
 
 	// ArrayList<Route> driverroute = new ArrayList<Route>();
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.single_webview);
-
+		
+		Bundle extras = getIntent().getExtras();
+		fuelConsumedFactor=extras.getDouble("fuelConsumedFactor");
+		((PublicDataBox) getApplication()).setUserCarFuelFactor(fuelConsumedFactor);
 		setupData();
 
 		myWebView = (WebView) findViewById(R.id.singleWebView);
@@ -66,27 +76,67 @@ public class MatchRoutes extends Activity {
 	}
 
 	private void setupData() {
+		//loading user's route
+		
+		Points start=((PublicDataBox) getApplication()).getStartPoint();
+		Points end=((PublicDataBox) getApplication()).getEndPoint();
+		UserRoute=new Person(((PublicDataBox) getApplication()).getUsername(),
+				((PublicDataBox) getApplication()).isUserModel(),
+				start,end);
+		UserRoute.setTravalDistance(((PublicDataBox) getApplication()).getDistanceFromStartToEnd());
+		Preferences myPrefer=new Preferences(false, true);
+		UserRoute.setMyPreference(myPrefer);
+		CarType mycar=(((PublicDataBox) getApplication()).getUserCar());
+		mycar.calculate();
+		UserRoute.setMyCar(mycar);
+		UserRoute.cal_originalCost();
+		
+		
 		//seting some fake date into requestList
 		//4 request into requestList
 		((PublicDataBox) getApplication()).clearOfferList();
 		((PublicDataBox) getApplication()).clearRequestList();
 		
-		Points start=new Points(-45.863447,170.523348);
-		Points end=new Points(-45.877222,170.49978);
+		start=new Points(-45.863447,170.523348);
+		end=new Points(-45.877222,170.49978);
+		
 		Person peter=new Person("Peter",false,start,end);
 		peter.setTravalDistance(3.3);
+		
+		myPrefer=new Preferences(false, true);
+		peter.setMyPreference(myPrefer);
+		
+		mycar=new CarType(true);//Petrol car
+		mycar.setFuelConsumeFactor(7);// 7 liter per 100 KM;
+		mycar.calculate();
+		peter.setMyCar(mycar);
+		
+		peter.cal_originalCost();
+		
 		//Route route1=new Route("request",peter);
 		((PublicDataBox) getApplication()).addRequestToList(peter);
 		Log.i(" ADD one route", String.valueOf(((PublicDataBox) getApplication()).getRequestListSize()));
-/*		
+		
+		
 		start=new Points(-45.862759,170.519743);
 		end=new Points(-45.899447,170.506253);
-		Person david=new Person("David",start,end);
-		david.setTravalDistance(5.4);
-		Route route2=new Route("request",david);
-		((PublicDataBox) getApplication()).addRequestToList(route2);
-		Log.i(" ADD one route", String.valueOf(((PublicDataBox) getApplication()).getRequestListSize()));
 		
+		
+		Person david=new Person("David",true,start,end);
+		david.setTravalDistance(5.4);
+		
+		//Preferences myPrefer=new Preferences(false, true);
+		david.setMyPreference(myPrefer);
+		
+		//CarType mycar=new CarType(true);//Petrol car
+		mycar.setFuelConsumeFactor(7);// 7 liter per 100 KM;
+		mycar.calculate();
+		david.setMyCar(mycar);
+		
+		david.cal_originalCost();
+		((PublicDataBox) getApplication()).addRequestToList(david);
+		Log.i(" ADD two route", String.valueOf(((PublicDataBox) getApplication()).getRequestListSize()));
+		/*
 		start=new Points(-45.866346,170.506082);
 		end=new Points(-45.912646,170.481534);
 		Person amy=new Person("Amy",start,end);
@@ -204,13 +254,152 @@ public class MatchRoutes extends Activity {
 
 	}
 	//for driver to find passenger
+	private void findPassenger() {
+		// persons in car is 2, driver and a passenger
+		int numberPerson = 2;
+		double detourDistance = 0;
+		// its description see bottom of function
+		int condition = 2;
+		if (UserRoute.isDriver()) {
+			// if user is driver doing below
+
+			Person temp = new Person();
+			// find matched passenger from list
+			// get list of passengers
+
+			// firstly to get detour distance
+			detourDistance = 0;
+			temp = ((PublicDataBox) getApplication()).getRequestByIndex(0);
+			// calculate detourCost for driver
+			calDistance(UserRoute.getDeparturePoint(), temp.getDeparturePoint());
+			// waiting results
+			SystemClock.sleep(1000);
+			detourDistance += Double.parseDouble(res_distance);
+
+			calDistance(UserRoute.getArrivalPoint(), temp.getArrivalPoint());
+			// waiting results
+			SystemClock.sleep(1000);
+			detourDistance += Double.parseDouble(res_distance);
+			// then calculate detour cost for driver
+			UserRoute.cal_detourCost(detourDistance/1000);
+
+			Log.i("detourDistance = = ", String.valueOf(detourDistance/1000));
+			Log.i("orignial travel distance== ", String.valueOf(UserRoute.getTravalDistance()));
+		
+
+			// calculate sharedCost for driver, sharedDistance is passenger's
+			// original cost
+			UserRoute.cal_sharedCost(temp.getTravalDistance(), numberPerson);
+			//SystemClock.sleep(1000);
+
+			 Log.i("sharedDistance = = ",
+			 String.valueOf(temp.getTravalDistance()));
+			Log.i("sharedCost = = ",
+			String.valueOf(UserRoute.getSharedCost().getCarbonConsumed()));
+
+			// if detourCost+sharedCost < driver.origialCost
+			// condition 1:
+			// if driver's original total carbon omission > shared + detoured
+			// carbon omission
+			// then put this one into matched list.
+			if (condition == 1) {
+				if (UserRoute.getOriginalCost().getCarbonConsumed() > (UserRoute
+						.getDetourCost().getCarbonConsumed() + UserRoute
+						.getSharedCost().getCarbonConsumed())) {
+					MatchedPassengerList.add(temp);
+					Log.i("ADD    a  Passenger", temp.getUsername());
+				}
+			}
+			// condition 2:
+			// if the sum of driver's original carbon omission and passengers' >
+			// driver's shared + detoured carbon omission
+			// then put this one into matched list.
+			if (condition == 2) {
+
+				Log.i(" oinignal Cost ===== ", String.valueOf(UserRoute
+						.getOriginalCost().getCarbonConsumed()));
+				Log.i(" shared cost ===== ", String.valueOf(UserRoute
+						.getSharedCost().getCarbonConsumed()));
+				Log.i(" detoured cost ===== ", String.valueOf(UserRoute
+						.getDetourCost().getCarbonConsumed()));
+
+				if ((UserRoute.getOriginalCost().getCarbonConsumed() + temp
+						.getOriginalCost().getCarbonConsumed()) > (UserRoute
+						.getDetourCost().getCarbonConsumed() + UserRoute
+						.getSharedCost().getCarbonConsumed())) {
+					MatchedPassengerList.add(temp);
+					Log.i("ADD    a  Passenger", temp.getUsername());
+				}
+			}
+			// only for testing.
+			AlertDialog.Builder builderSingle = new AlertDialog.Builder(this);
+			builderSingle.setIcon(R.drawable.ic_launcher);
+			builderSingle.setTitle("if there any, Select One Passenger:-");
+			final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
+					this, android.R.layout.select_dialog_singlechoice);
+			if (MatchedPassengerList.size() > 0) {
+				arrayAdapter.add(MatchedPassengerList.get(0).getUsername() + "  Carbon Cost= "+ 
+						UserRoute.getSharedCost().getCarbonConsumed()+" + "+UserRoute.getDetourCost().getCarbonConsumed());
+			}else{
+				arrayAdapter.add("NOT FOUND MATCH");
+			}
+
+			builderSingle.setNegativeButton("cancel",
+					new DialogInterface.OnClickListener() {
+
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							dialog.dismiss();
+						}
+					});
+
+			builderSingle.setAdapter(arrayAdapter,
+					new DialogInterface.OnClickListener() {
+
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+
+							new DialogInterface.OnClickListener() {
+
+								@Override
+								public void onClick(DialogInterface dialog,
+										int which) {
+									
+									dialog.dismiss();
+									
+								}
+							};
+
+						}
+					});
+			builderSingle.show();
+			drawPathonMap(0);
+		}
+
+	}
+	private void calDistance(Points From, Points To){
+		JSONObject json = new JSONObject();
+		
+		// detour distance from driver's departure to passenger's 
+		try {
+			json.put("depalat", From.getLatDouble());
+			json.put("depalng", From.getLngDouble());
+			json.put("dstlat", To.getLatDouble());
+			json.put("dstlng", To.getLngDouble());
+			//send to WebView to calculate, result back to res_distance
+			myWebView.loadUrl("javascript:caldistance(" + "'"
+					+ json.toString() + "'" + ")");
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	private void findRequestMatch() {
 
-		Person userRoute = new Person();
-		userRoute = ((PublicDataBox) getApplication()).getUser();
+		
 		int shortestpath = Integer.MAX_VALUE, index = 0;
 		try {
-			int temp_short = 0;
+			int detourDistance = 0;
 			Person temp = new Person();
 			// find shortest path between userroute.startpoint,
 			// ,WayPoint[request.start point, request.end point],
@@ -227,8 +416,8 @@ public class MatchRoutes extends Activity {
 							.getRequestByIndex(i);
 
 					// detour distance from driver's departure to passenger's 
-					json.put("depalat", userRoute.getDeparturePoint().getLatDouble());
-					json.put("depalng", userRoute.getDeparturePoint().getLngDouble());
+					json.put("depalat", UserRoute.getDeparturePoint().getLatDouble());
+					json.put("depalng", UserRoute.getDeparturePoint().getLngDouble());
 					json.put("dstlat", temp.getDeparturePoint().getLatDouble());
 					json.put("dstlng", temp.getDeparturePoint().getLngDouble());
 
@@ -236,18 +425,18 @@ public class MatchRoutes extends Activity {
 							+ json.toString() + "'" + ")");
 					SystemClock.sleep(1000);
 
-					temp_short += Integer.parseInt(res_distance);
+					detourDistance += Integer.parseInt(res_distance);
 					// Log.i("json res_distance ",String.valueOf(temp_short));
-
-					json2.put("dstlat", userRoute.getArrivalPoint().getLatDouble());
-					json2.put("dstlat", userRoute.getArrivalPoint().getLngDouble());
+					//detour distance from driver's arrivalPoint to passengers'
+					json2.put("dstlat", UserRoute.getArrivalPoint().getLatDouble());
+					json2.put("dstlat", UserRoute.getArrivalPoint().getLngDouble());
 					json2.put("depalat", temp.getArrivalPoint().getLatDouble());
 					json2.put("depalng", temp.getArrivalPoint().getLngDouble());
 
 					myWebView.loadUrl("javascript:caldistance(" + "'"
 							+ json2.toString() + "'" + ")");
 					// Log.i("res_distance ",res_distance);
-					temp_short += Integer.parseInt(res_distance);
+					detourDistance += Integer.parseInt(res_distance);
 					
 					//shared distance with passenger
 					json3.put("dstlat", temp.getArrivalPoint().getLatDouble());
@@ -257,13 +446,13 @@ public class MatchRoutes extends Activity {
 					myWebView.loadUrl("javascript:caldistance(" + "'"
 							+ json3.toString() + "'" + ")");
 					// Log.i("res_distance ",res_distance);
-					temp_short += Integer.parseInt(res_distance) / 2;
+					detourDistance += Integer.parseInt(res_distance) / 2;
 					
 					//if user.carben+temp_short
-					Log.i("temp_short== ", String.valueOf(temp_short));
-					if (temp_short < shortestpath) {
-						shortestpath = temp_short;
-						temp_short = 0;
+					Log.i("temp_short== ", String.valueOf(detourDistance));
+					if (detourDistance < shortestpath) {
+						shortestpath = detourDistance;
+						detourDistance = 0;
 						index = i;
 					}
 				}	
@@ -301,17 +490,17 @@ public class MatchRoutes extends Activity {
 
 	private void drawPathonMap(int index) {
 
-		Person userRoute = new Person();
-		userRoute = ((PublicDataBox) getApplication()).getUser();
+		//Person userRoute = new Person();
+		//userRoute = ((PublicDataBox) getApplication()).getUser();
 		JSONObject json = new JSONObject();
 		Person temp = new Person(); 
 		temp= ((PublicDataBox) getApplication())
 				.getRequestByIndex(index);
 
 		try {
-			json.put("depalat", userRoute.getDeparturePoint()
+			json.put("depalat", UserRoute.getDeparturePoint()
 					.getLatDouble());
-			json.put("depalng", userRoute.getDeparturePoint()
+			json.put("depalng", UserRoute.getDeparturePoint()
 					.getLngDouble());
 
 			json.put("wp1lat", temp.getDeparturePoint()
@@ -323,12 +512,12 @@ public class MatchRoutes extends Activity {
 			json.put("wp2lng", temp.getArrivalPoint()
 					.getLngDouble());
 
-			json.put("dstlat", userRoute.getArrivalPoint()
+			json.put("dstlat", UserRoute.getArrivalPoint()
 					.getLatDouble());
-			json.put("dstlng", userRoute.getArrivalPoint()
+			json.put("dstlng", UserRoute.getArrivalPoint()
 					.getLngDouble());
 
-			Log.i("json= ", json.toString());
+			//Log.i("json= ", json.toString());
 			myWebView.loadUrl("javascript:draw_path(" + "'" + json.toString()
 					+ "'" + ")");
 			/*myWebView.loadUrl("javascript:draw_path2(" + "'" + json.toString()
@@ -386,7 +575,8 @@ public class MatchRoutes extends Activity {
 		}
 			break;
 		case R.id.action_findMatch: {
-			findRequestMatch();
+			//findRequestMatch();
+			findPassenger();
 		}
 			break;
 

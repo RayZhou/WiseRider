@@ -193,6 +193,9 @@ body {
 		directionsService.route(request, function(response, status) {
 			if (status == google.maps.DirectionsStatus.OK) {
 				
+				//back to android
+				window.android.receiveDistance(response.routes[0].legs[0].distance.value);
+				
 				// Display the distance:
 		         document.getElementById('distance').innerHTML = 
 		            response.routes[0].legs[0].distance.value + " meters away from Start Point";

@@ -37,7 +37,7 @@ public class MainActivity extends Activity implements LocationListener {
 	    case R.id.setoffer:
 	    {
 	    	//TODO set an offer
-	    	((PublicDataBox) getApplication()).setRouteModel("offer");
+	    	((PublicDataBox) getApplication()).setUserModel(true);
 	    	
 	    	
 	        android.app.FragmentManager fm = getFragmentManager();
@@ -51,7 +51,7 @@ public class MainActivity extends Activity implements LocationListener {
 	      break;
 	    case R.id.request:{
 	    	//TODO request staff
-	    	((PublicDataBox) getApplication()).setRouteModel("request");
+	    	((PublicDataBox) getApplication()).setUserModel(false);
 	    	
 	        android.app.FragmentManager fm = getFragmentManager();
 	        SetDirectionDialog setOfferDialog = new SetDirectionDialog();

@@ -12,11 +12,24 @@ public class PublicDataBox extends Application {
 	private Location mostRecentLocation;
 	public static SharedPreferences preferences;
 	private Points startPoint=new Points(),endPoint=new Points();
+	private CarType userCar=new CarType(true);
+	private double distanceFromStartToEnd=0;
 	private String tempStartAddress,tempEndAddress;
-	private Person user=new Person();
-	private String RouteModel="";
 	//user model, true as driver, false as passenger;
 	private boolean userModel=true;
+	
+	/**
+	 * @return the distanceFromStartToEnd
+	 */
+	public double getDistanceFromStartToEnd() {
+		return distanceFromStartToEnd;
+	}
+	/**
+	 * @param d the distanceFromStartToEnd to set
+	 */
+	public void setDistanceFromStartToEnd(double d) {
+		this.distanceFromStartToEnd = d;
+	}
 	
 	public boolean isUserModel() {
 		return userModel;
@@ -39,12 +52,15 @@ public class PublicDataBox extends Application {
 	public void clearRequestList(){
 		requestList.clear();
 	}
-	public Person getUser(){
-		return user;
-	}
+	/**
+	 * @param toAdd, add a driver to driver list
+	 */
 	public void addOfferToList(Person toAdd){
 		offerList.add(toAdd);
 	}
+	/**
+	 * @param toAdd add a passenger to passenger list
+	 */
 	public void addRequestToList(Person toAdd){
 		requestList.add(toAdd);
 	}
@@ -60,16 +76,22 @@ public class PublicDataBox extends Application {
 	public Person getRequestByIndex(int index){
 		return requestList.get(index);
 	}
-	public void saveUser(){
-		if(startPoint.isNotEmpty()){
-			if(endPoint.isNotEmpty()){
-				String username=getUsername();
-				Person temp=new Person(username,userModel,startPoint,endPoint);
-				user=temp;
-			}
-		}
+	/**
+	 * @return the userCar
+	 */
+	public CarType getUserCar() {
+		return userCar;
 	}
-
+	public void setUserCarFuelFactor(double factor){
+		userCar.setFuelConsumeFactor(factor);
+		//userCar.calculate();
+	}
+	/**
+	 * @param userCar the userCar to set
+	 */
+	public void setUserCar(CarType userCar) {
+		this.userCar = userCar;
+	}
 	public Location getMostRecentLocation() {
 		return mostRecentLocation;
 	}
@@ -106,7 +128,7 @@ public class PublicDataBox extends Application {
 	 */
 	public void setEndPoint(Points endPoint) {
 		this.endPoint = endPoint;
-		saveUser();
+		//saveUser();
 	}
 
 	/**
@@ -149,9 +171,6 @@ public class PublicDataBox extends Application {
 	 */
 	public void setTempEndAddress(String tempEndAddress) {
 		this.tempEndAddress = tempEndAddress;
-	}
-	public void setRouteModel(String routeModel) {
-		RouteModel = routeModel;
 	}
 
 }

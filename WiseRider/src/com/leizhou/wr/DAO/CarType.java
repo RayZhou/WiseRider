@@ -7,38 +7,17 @@ public class CarType {
 	private double engineSize;
 	//this is show how much fuel consumed by per 100KM
 	private double fuelConsumeFactor=0;
-	private double fuelConsumedPerKM;
-	
-	//Notice, after calcaulate, THIS is going to be the number of Units per KM
+	//need to be calculated
+	private double fuelConsumedPerKM;	
+	//Notice, after calculated, THIS is going to be the number of Units per KM
 	private double emissionFactor;
 	
-	public double getFuelConsumeFactor() {
-		return fuelConsumeFactor;
-	}
-	public void setFuelConsumeFactor(double fuelConsumeFactor) {
-		this.fuelConsumeFactor = fuelConsumeFactor;
-	}
-	public double getFuelConsumedPerKM() {
-		return fuelConsumedPerKM;
-	}
-	public void setFuelConsumedPerKM(double fuelConsumedPerKM) {
-		this.fuelConsumedPerKM = fuelConsumedPerKM;
+	public CarType(){
+		fuelType=true;
 	}
 	/**
-	 * @return the number of emission units per KM
+	 * @param fuelType, true is petrol, false as diesel
 	 */
-	public double getEmissionFactor() {
-		return emissionFactor;
-	}
-	public void setEmissionFactor(double emissionFactor) {
-		this.emissionFactor = emissionFactor;
-	}
-
-
-	//assume using regular petrol;
-	private double petrolConsumedRate=2.34;//units per Liter
-	private double dieselConsumedRate=2.7;//units per Liter
-	
 	public CarType(boolean fuelType){
 		this.fuelType=fuelType;
 	}
@@ -57,7 +36,6 @@ public class CarType {
 		
 	}
 	
-	
 	private void calculateEmissionFactor(){
 		//calculate only assume regular petrol!!!
 		if(engineSize<=1.6){
@@ -73,4 +51,39 @@ public class CarType {
 			fuelConsumedPerKM=emissionFactor/petrolConsumedRate;
 		}
 	}
+	
+	public double getEngineSize() {
+		return engineSize;
+	}
+	/**
+	 * @param engineSize, what's liter of engine.if fuelConsumeFactor been seated, this one can leave to empty
+	 */
+	public void setEngineSize(double engineSize) {
+		this.engineSize = engineSize;
+	}
+	public double getFuelConsumeFactor() {
+		return fuelConsumeFactor;
+	}
+	/**
+	 * @param fuelConsumeFactor, how much consumed per 100 KM
+	 */
+	public void setFuelConsumeFactor(double fuelConsumeFactor) {
+		this.fuelConsumeFactor = fuelConsumeFactor;
+	}
+	public double getFuelConsumedPerKM() {
+		return fuelConsumedPerKM;
+	}
+	/**
+	 * @return the number of emission units per KM
+	 */
+	public double getEmissionFactor() {
+		return emissionFactor;
+	}
+
+	//assume using regular petrol;
+	private double petrolConsumedRate=2.34;//units per Liter
+	private double dieselConsumedRate=2.7;//units per Liter
+	
+
+
 }

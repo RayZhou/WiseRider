@@ -9,6 +9,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.util.Log;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
@@ -21,6 +22,7 @@ public class OpenWebView extends Activity {
 	private static final String MAP_URL_start = "file:///android_asset/SelectStartAddress.html";
 	private static final String MAP_URL_end = "file:///android_asset/endaddress_elevator.html";
 	boolean isStartAddress;
+	private String res_distance = "1";
 	private boolean userModel=true;
 
 	@Override
@@ -131,6 +133,20 @@ public class OpenWebView extends Activity {
 		@JavascriptInterface
 		public void finishActivie() {
 			finish();
+		}
+		
+		@JavascriptInterface
+		public void receiveDistance(String rs) {
+
+			// Log.i("res_distance", String.valueOf(rs));
+			
+			SystemClock.sleep(1000);
+			res_distance = String.valueOf(rs);
+			((PublicDataBox) getApplication()).setDistanceFromStartToEnd(Double.valueOf(res_distance)/1000);
+			// ((PublicDataBox)
+			// getApplication()).setTestInt(Integer.parseInt(rs.toString()));
+			Log.i("res_distance  from openWebView  =====",res_distance);
+
 		}
 
 	}

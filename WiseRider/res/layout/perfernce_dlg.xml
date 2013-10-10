@@ -60,18 +60,19 @@
         android:layout_height="wrap_content" >
 
         <EditText
-            android:id="@+id/editTextSeatNum"
+            android:id="@+id/editFuelConsumed"
             android:layout_width="0dip"
             android:layout_height="wrap_content"
             android:layout_weight="0.12"
-            android:ems="10"
+            android:ems="5"
+            android:hint="@string/defaultFuelConsumed"
             android:inputType="number" />
         
         	    <TextView
-        	        android:id="@+id/textSeatNum"
+        	        android:id="@+id/textFuelConsumed"
         	        android:layout_width="wrap_content"
         	        android:layout_height="44dp"
-        	        android:text="@string/seatsNum" />
+        	        android:text="@string/FuelConsumed" />
         
     </LinearLayout>
     <LinearLayout

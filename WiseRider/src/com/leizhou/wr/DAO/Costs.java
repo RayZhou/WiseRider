@@ -5,6 +5,8 @@ public class Costs {
 	private double fuelConsumed=0;
 	private double carbonConsumed=0;
 	private double moneyToPay=0;
+	//assume the price of fuel is $2 per liter;
+	private double priceOfFuel=2;
 	
 	public double getCarbonConsumed() {
 		return carbonConsumed;
@@ -22,10 +24,12 @@ public class Costs {
 		this.moneyToPay = moneyToPay;
 	}
 	
-	//assume the price of fuel is $2 per liter;
-	private double priceOfFuel=2;
+
 	
 	public Costs(){
+		fuelConsumed=0;
+		carbonConsumed=0;
+		moneyToPay=0;
 		
 	}
 	

@@ -21,6 +21,8 @@
     <string name="only_female">only female in car</string>
      <string name="price">Payment (higher may increse matching rate)</string>
      <string name="seatsNum">Seats Aviable</string>
+     <string name="FuelConsumed"> liters per 100 KM </string>
+     <string name="defaultFuelConsumed"> 10</string>
     
 
 </resources>
